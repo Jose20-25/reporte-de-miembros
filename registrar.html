@@ -51,7 +51,12 @@
                     <label>Nombre del Padre:</label><input type="text" name="padre_nino"><br>
                     <label>Nombre de la Madre:</label><input type="text" name="madre_nino"><br>
                     <label>Fotografía:</label>
-                    <input type="file" accept="image/*" capture="environment" name="foto" id="foto_nino"><br>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button type="button" onclick="abrirCamara(this)" style="padding:6px 12px;">Tomar foto</button>
+                        <button type="button" onclick="cargarArchivo(this)" style="padding:6px 12px;">Cargar foto</button>
+                        <input type="file" accept="image/*" name="foto" style="display:none;">
+                        <img src="" alt="Vista previa" style="display:none;width:60px;height:60px;border-radius:50%;object-fit:cover;margin-left:10px;" class="preview-foto">
+                    </div><br>
                     <button type="submit">Registrar Niño</button>
                 </form>
             </div>
@@ -80,7 +85,12 @@
                     <label>Nombre del Padre:</label><input type="text" name="padre_joven"><br>
                     <label>Nombre de la Madre:</label><input type="text" name="madre_joven"><br>
                     <label>Fotografía:</label>
-                    <input type="file" accept="image/*" capture="environment" name="foto" id="foto_joven"><br>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button type="button" onclick="abrirCamara(this)" style="padding:6px 12px;">Tomar foto</button>
+                        <button type="button" onclick="cargarArchivo(this)" style="padding:6px 12px;">Cargar foto</button>
+                        <input type="file" accept="image/*" name="foto" style="display:none;">
+                        <img src="" alt="Vista previa" style="display:none;width:60px;height:60px;border-radius:50%;object-fit:cover;margin-left:10px;" class="preview-foto">
+                    </div><br>
                     <button type="submit">Registrar Joven</button>
                 </form>
             </div>
@@ -129,7 +139,12 @@
                         <div id="nombres_hijos"></div>
                     </div>
                     <label>Fotografía:</label>
-                    <input type="file" accept="image/*" capture="environment" name="foto" id="foto_adulto"><br>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button type="button" onclick="abrirCamara(this)" style="padding:6px 12px;">Tomar foto</button>
+                        <button type="button" onclick="cargarArchivo(this)" style="padding:6px 12px;">Cargar foto</button>
+                        <input type="file" accept="image/*" name="foto" style="display:none;">
+                        <img src="" alt="Vista previa" style="display:none;width:60px;height:60px;border-radius:50%;object-fit:cover;margin-left:10px;" class="preview-foto">
+                    </div><br>
                     <button type="submit">Registrar Adulto</button>
                 </form>
             </div>
@@ -276,6 +291,34 @@
                     }
                 }
             }
+        });
+        function abrirCamara(btn) {
+            const input = btn.parentElement.querySelector('input[type="file"]');
+            input.accept = 'image/*';
+            input.capture = 'environment';
+            input.click();
+        }
+        function cargarArchivo(btn) {
+            const input = btn.parentElement.querySelector('input[type="file"]');
+            input.accept = 'image/*';
+            input.removeAttribute('capture');
+            input.click();
+        }
+        document.querySelectorAll('input[type="file"][name="foto"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const preview = input.parentElement.querySelector('.preview-foto');
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'inline-block';
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
+            });
         });
     </script>
     <footer>
