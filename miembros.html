@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miembros</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .card-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+.card-miembro {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px 18px 16px 18px;
+    width: 270px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.2s;
+    position: relative;
+}
+.card-miembro:hover {
+    box-shadow: 0 4px 16px rgba(26,188,156,0.15);
+}
+.card-miembro img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    border: 2px solid #1abc9c;
+    background: #f4f4f4;
+}
+.card-miembro .nombre {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 4px;
+    text-align: center;
+}
+.card-miembro .detalle {
+    font-size: 0.98em;
+    color: #555;
+    margin-bottom: 2px;
+    text-align: center;
+}
+.card-miembro .iglesia {
+    font-size: 0.95em;
+    color: #1abc9c;
+    margin-bottom: 6px;
+    text-align: center;
+}
+@media (max-width: 800px) {
+    .card-list { flex-direction: column; align-items: center; }
+    .card-miembro { width: 95%; }
+}
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo/logo Iglesia.png" alt="Logo Iglesia" class="logo">
+        <h1>Control de Membresía</h1>
+        <nav>
+            <ul class="menu">
+                <li><a href="inicio.html">Inicio</a></li>
+                <li><a href="registrar.html">Registrar Miembro</a></li>
+                <li><a href="miembros.html">Miembros</a></li>
+                <li><a href="reportes.html">Reportes</a></li>
+                <li><a href="salir.html">Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Miembros</h2>
+            <p>Aquí podrás ver la lista de miembros registrados.</p>
+            <h3>Iglesia Central</h3>
+            <div class="card-list" id="central"></div>
+            <h3>Filial La Tekera</h3>
+            <div class="card-list" id="tekera"></div>
+            <h3>Filial El Pital</h3>
+            <div class="card-list" id="pital"></div>
+            <h3>Filial El Sauce</h3>
+            <div class="card-list" id="sauce"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Iglesia. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+function obtenerMiembros() {
+    return JSON.parse(localStorage.getItem('miembros') || '[]');
+}
+function renderizarMiembros() {
+    const miembros = obtenerMiembros();
+    const iglesias = { central: [], tekera: [], pital: [], sauce: [] };
+    miembros.forEach((m, idx) => {
+        if (iglesias[m.iglesia]) iglesias[m.iglesia].push({ ...m, _idx: idx });
+    });
+    Object.keys(iglesias).forEach(key => {
+        const contenedor = document.getElementById(key);
+        if (!contenedor) return;
+        contenedor.innerHTML = '';
+        iglesias[key].forEach(miembro => {
+            let nombre = miembro.nombre_nino || miembro.nombre_joven || miembro.nombre_adulto || '';
+            let sexo = miembro.sexo_nino || miembro.sexo_joven || miembro.sexo_adulto || '';
+            let edad = miembro.edad_nino || miembro.edad_joven || miembro.edad_adulto || '';
+            let estado = miembro.estado_civil_adulto || '';
+            let iglesia = key === 'central' ? 'Iglesia Central' : key === 'tekera' ? 'Filial La Tekera' : key === 'pital' ? 'Filial El Pital' : 'Filial El Sauce';
+            let foto = miembro.foto_base64 || '';
+            let imgTag = foto ? `<img src="${foto}" alt="Foto" ondblclick="editarMiembro(${miembro._idx})">` : '<img src="logo/logo Iglesia.png" alt="Foto" ondblclick="editarMiembro(' + miembro._idx + ')">';
+            let fechaNac = miembro.fecha_nacimiento_nino || miembro.fecha_nacimiento_joven || miembro.fecha_nacimiento_adulto || '';
+            let dui = miembro.dui_joven || miembro.dui_adulto || '';
+            let telefono = miembro.telefono_joven || '';
+            let padre = miembro.padre_nino || miembro.padre_joven || '';
+            let madre = miembro.madre_nino || miembro.madre_joven || '';
+            let conyugue = miembro.nombre_conyugue || '';
+            let acompanado = miembro.nombre_acompanado || '';
+            let tieneHijos = miembro.tiene_hijos || '';
+            let cantidadHijos = miembro.cantidad_hijos || '';
+            let hijos = '';
+            if (cantidadHijos && parseInt(cantidadHijos) > 0) {
+                for (let i = 1; i <= cantidadHijos; i++) {
+                    hijos += `<li>${miembro['nombre_hijo_' + i]}</li>`;
+                }
+            }
+            contenedor.innerHTML += `
+                <div class="card-miembro">
+                    ${imgTag}
+                    <div class="nombre">${nombre}</div>
+                    <div class="detalle">Sexo: ${sexo}</div>
+                    <div class="detalle">Fecha Nac.: ${fechaNac}</div>
+                    <div class="detalle">Edad: ${edad}</div>
+                    <div class="detalle">Iglesia: ${iglesia}</div>
+                    ${dui ? `<div class="detalle">DUI: ${dui}</div>` : ''}
+                    ${telefono ? `<div class="detalle">Teléfono: ${telefono}</div>` : ''}
+                    ${padre ? `<div class="detalle">Padre: ${padre}</div>` : ''}
+                    ${madre ? `<div class="detalle">Madre: ${madre}</div>` : ''}
+                    ${estado ? `<div class="detalle">Estado Civil: ${estado}</div>` : ''}
+                    ${conyugue ? `<div class="detalle">Cónyuge: ${conyugue}</div>` : ''}
+                    ${acompanado ? `<div class="detalle">Acompañado(a): ${acompanado}</div>` : ''}
+                    ${tieneHijos === 'si' ? `<div class="detalle">Hijos:<ul style='margin:0 0 0 15px;padding:0;'>${hijos}</ul></div>` : ''}
+                </div>
+            `;
+        });
+    });
+}
+
+function editarMiembro(idx) {
+    const miembros = obtenerMiembros();
+    const miembro = miembros[idx];
+    if (!miembro) return;
+    // Guardar el índice a editar
+    localStorage.setItem('editar_miembro_idx', idx);
+    // Redirigir a la página de registro con los datos cargados
+    window.location.href = 'registrar.html?editar=1';
+}
+
+document.addEventListener('DOMContentLoaded', renderizarMiembros);
+    </script>
+</body>
+</html>

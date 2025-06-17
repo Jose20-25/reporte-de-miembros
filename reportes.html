@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+    .card-list-cumple {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        margin-bottom: 40px;
+    }
+    .card-cumple {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+        padding: 28px 24px 22px 24px;
+        width: 370px;
+        min-height: 340px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: box-shadow 0.2s;
+        position: relative;
+    }
+    .card-cumple:hover {
+        box-shadow: 0 6px 20px rgba(26,188,156,0.18);
+    }
+    .card-cumple img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin-bottom: 16px;
+        border: 3px solid #1abc9c;
+        background: #f4f4f4;
+    }
+    .card-cumple .nombre {
+        font-size: 1.25em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 6px;
+        text-align: center;
+    }
+    .card-cumple .detalle {
+        font-size: 1.05em;
+        color: #555;
+        margin-bottom: 4px;
+        text-align: center;
+    }
+    .card-cumple .iglesia {
+        font-size: 1.05em;
+        color: #1abc9c;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+    @media (max-width: 900px) {
+        .card-list-cumple { flex-direction: column; align-items: center; }
+        .card-cumple { width: 98%; }
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo/logo Iglesia.png" alt="Logo Iglesia" class="logo">
+        <h1>Control de Membresía</h1>
+        <nav>
+            <ul class="menu">
+                <li><a href="inicio.html">Inicio</a></li>
+                <li><a href="registrar.html">Registrar Miembro</a></li>
+                <li><a href="miembros.html">Miembros</a></li>
+                <li><a href="reportes.html">Reportes</a></li>
+                <li><a href="salir.html">Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Reportes</h2>
+            <p>Aquí podrás ver y generar reportes de los miembros.</p>
+            <h3>Cumpleañeros de <span id="mes-actual"></span></h3>
+            <button onclick="imprimirCumpleaneros()" style="margin-bottom:20px;background:#1abc9c;color:#fff;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;font-size:16px;">Imprimir reporte de cumpleañeros</button>
+            <div class="card-list-cumple" id="cumpleaneros"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Iglesia. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+    function obtenerMiembros() {
+        return JSON.parse(localStorage.getItem('miembros') || '[]');
+    }
+    function cumpleanerosDelMes() {
+        const miembros = obtenerMiembros();
+        const hoy = new Date();
+        const mesActual = hoy.getMonth() + 1;
+        const anioActual = hoy.getFullYear();
+        const contenedor = document.getElementById('cumpleaneros');
+        contenedor.innerHTML = '';
+        miembros.forEach(m => {
+            let nombre = m.nombre_nino || m.nombre_joven || m.nombre_adulto || '';
+            let iglesia = '';
+            if (m.iglesia === 'central') iglesia = 'Iglesia Central';
+            if (m.iglesia === 'tekera') iglesia = 'Filial La Tekera';
+            if (m.iglesia === 'pital') iglesia = 'Filial El Pital';
+            if (m.iglesia === 'sauce') iglesia = 'Filial El Sauce';
+            let fechaNac = m.fecha_nacimiento_nino || m.fecha_nacimiento_joven || m.fecha_nacimiento_adulto || '';
+            let sexo = m.sexo_nino || m.sexo_joven || m.sexo_adulto || '';
+            let edad = '';
+            let foto = m.foto_base64 || '';
+            let dui = m.dui_joven || m.dui_adulto || '';
+            let telefono = m.telefono_joven || '';
+            let padre = m.padre_nino || m.padre_joven || '';
+            let madre = m.madre_nino || m.madre_joven || '';
+            let estado = m.estado_civil_adulto || '';
+            let conyugue = m.nombre_conyugue || '';
+            let acompanado = m.nombre_acompanado || '';
+            let tieneHijos = m.tiene_hijos || '';
+            let cantidadHijos = m.cantidad_hijos || '';
+            let hijos = '';
+            if (cantidadHijos && parseInt(cantidadHijos) > 0) {
+                for (let i = 1; i <= cantidadHijos; i++) {
+                    hijos += `<li>${m['nombre_hijo_' + i]}</li>`;
+                }
+            }
+            if (fechaNac) {
+                const mes = parseInt(fechaNac.split('-')[1]);
+                if (mes === mesActual) {
+                    // Calcular edad
+                    const anio = parseInt(fechaNac.split('-')[0]);
+                    edad = anioActual - anio;
+                    const dia = parseInt(fechaNac.split('-')[2]);
+                    if ((hoy.getMonth() + 1) === mes && hoy.getDate() < dia) edad--;
+                    let imgTag = foto ? `<img src="${foto}" alt="Foto">` : '<img src="logo/logo Iglesia.png" alt="Foto">';
+                    contenedor.innerHTML += `
+                        <div class="card-cumple">
+                            ${imgTag}
+                            <div class="nombre">${nombre}</div>
+                            <div class="detalle">Sexo: ${sexo}</div>
+                            <div class="detalle">Fecha Nac.: ${fechaNac}</div>
+                            <div class="detalle">Edad: ${edad}</div>
+                            <div class="iglesia">${iglesia}</div>
+                            ${dui ? `<div class="detalle">DUI: ${dui}</div>` : ''}
+                            ${telefono ? `<div class="detalle">Teléfono: ${telefono}</div>` : ''}
+                            ${padre ? `<div class="detalle">Padre: ${padre}</div>` : ''}
+                            ${madre ? `<div class="detalle">Madre: ${madre}</div>` : ''}
+                            ${estado ? `<div class="detalle">Estado Civil: ${estado}</div>` : ''}
+                            ${conyugue ? `<div class="detalle">Cónyuge: ${conyugue}</div>` : ''}
+                            ${acompanado ? `<div class="detalle">Acompañado(a): ${acompanado}</div>` : ''}
+                            ${tieneHijos === 'si' ? `<div class="detalle">Hijos:<ul style='margin:0 0 0 15px;padding:0;'>${hijos}</ul></div>` : ''}
+                        </div>
+                    `;
+                }
+            }
+        });
+        // Mostrar el mes actual en texto
+        const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        document.getElementById('mes-actual').textContent = meses[hoy.getMonth()];
+    }
+    function imprimirCumpleaneros() {
+        const area = document.createElement('div');
+        area.innerHTML = `
+            <div style="text-align:center;margin-bottom:20px;">
+                <img src="logo/logo Iglesia.png" alt="Logo" style="width:80px;margin-bottom:10px;">
+                <h2 style="margin:0;color:#1abc9c;">Reporte de Cumpleañeros</h2>
+                <h3 style="margin:0 0 10px 0;">Mes de <span style='color:#2c3e50;'>${document.getElementById('mes-actual').textContent}</span> - ${new Date().getFullYear()}</h3>
+                <hr style="border:1px solid #1abc9c;width:60%;margin:10px auto;">
+            </div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;">
+                ${Array.from(document.querySelectorAll('.card-cumple')).map(card => card.outerHTML).join('')}
+            </div>
+            <div style="margin-top:30px;text-align:right;font-size:13px;color:#888;">Generado el ${new Date().toLocaleDateString()}</div>
+        `;
+        const win = window.open('', '', 'width=900,height=700');
+        win.document.write('<html><head><title>Reporte de Cumpleañeros</title>');
+        win.document.write('<style>body{font-family:Arial;background:#f4f4f4;} .card-cumple{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);padding:28px 24px 22px 24px;width:370px;min-height:340px;display:inline-block;margin:16px;vertical-align:top;text-align:center;} .card-cumple img{width:120px;height:120px;object-fit:cover;border-radius:50%;margin-bottom:16px;border:3px solid #1abc9c;background:#f4f4f4;} .nombre{font-size:1.25em;font-weight:bold;color:#2c3e50;margin-bottom:6px;} .detalle{font-size:1.05em;color:#555;margin-bottom:4px;} .iglesia{font-size:1.05em;color:#1abc9c;margin-bottom:8px;}</style>');
+        win.document.write('</head><body>');
+        win.document.write(area.innerHTML);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 500);
+    }
+    document.addEventListener('DOMContentLoaded', cumpleanerosDelMes);
+    </script>
+</body>
+</html>

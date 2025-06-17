@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Miembro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <img src="logo/logo Iglesia.png" alt="Logo Iglesia" class="logo">
+        <h1>Control de Membresía</h1>
+        <nav>
+            <ul class="menu">
+                <li><a href="inicio.html">Inicio</a></li>
+                <li><a href="registrar.html">Registrar Miembro</a></li>
+                <li><a href="miembros.html">Miembros</a></li>
+                <li><a href="reportes.html">Reportes</a></li>
+                <li><a href="salir.html">Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Registrar Miembro</h2>
+            <div class="tabs">
+                <button class="tab-btn" onclick="showForm('nino')">Niños</button>
+                <button class="tab-btn" onclick="showForm('joven')">Jóvenes</button>
+                <button class="tab-btn" onclick="showForm('adulto')">Adultos</button>
+            </div>
+            <div id="form-nino" class="formulario" style="display:block;">
+                <h3>Registro de Niño</h3>
+                <form>
+                    <label>Iglesia:</label>
+                    <select name="iglesia" required>
+                        <option value="">Seleccione</option>
+                        <option value="central">Iglesia Central</option>
+                        <option value="tekera">Filial La Tekera</option>
+                        <option value="pital">Filial El Pital</option>
+                        <option value="sauce">Filial El Sauce</option>
+                    </select><br>
+                    <label>Nombre:</label><input type="text" name="nombre_nino" required><br>
+                    <label>Sexo:</label>
+                    <select name="sexo_nino" required>
+                        <option value="">Seleccione</option>
+                        <option value="hombre">Hombre</option>
+                        <option value="mujer">Mujer</option>
+                    </select><br>
+                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_nino" required onchange="calcularEdad(this, 'edad_nino')"><br>
+                    <label>Edad:</label><input type="number" name="edad_nino" id="edad_nino" min="0" max="12" readonly required><br>
+                    <label>Nombre del Padre:</label><input type="text" name="padre_nino"><br>
+                    <label>Nombre de la Madre:</label><input type="text" name="madre_nino"><br>
+                    <label>Fotografía:</label>
+                    <input type="file" accept="image/*" capture="environment" name="foto" id="foto_nino"><br>
+                    <button type="submit">Registrar Niño</button>
+                </form>
+            </div>
+            <div id="form-joven" class="formulario" style="display:none;">
+                <h3>Registro de Joven</h3>
+                <form>
+                    <label>Iglesia:</label>
+                    <select name="iglesia" required>
+                        <option value="">Seleccione</option>
+                        <option value="central">Iglesia Central</option>
+                        <option value="tekera">Filial La Tekera</option>
+                        <option value="pital">Filial El Pital</option>
+                        <option value="sauce">Filial El Sauce</option>
+                    </select><br>
+                    <label>Nombre:</label><input type="text" name="nombre_joven" required><br>
+                    <label>Sexo:</label>
+                    <select name="sexo_joven" required>
+                        <option value="">Seleccione</option>
+                        <option value="hombre">Hombre</option>
+                        <option value="mujer">Mujer</option>
+                    </select><br>
+                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_joven" required onchange="calcularEdad(this, 'edad_joven')"><br>
+                    <label>Edad:</label><input type="number" name="edad_joven" id="edad_joven" min="13" max="25" readonly required><br>
+                    <label>DUI (opcional):</label><input type="text" name="dui_joven" placeholder="00000000-0"><br>
+                    <label>Teléfono:</label><input type="text" name="telefono_joven"><br>
+                    <label>Nombre del Padre:</label><input type="text" name="padre_joven"><br>
+                    <label>Nombre de la Madre:</label><input type="text" name="madre_joven"><br>
+                    <label>Fotografía:</label>
+                    <input type="file" accept="image/*" capture="environment" name="foto" id="foto_joven"><br>
+                    <button type="submit">Registrar Joven</button>
+                </form>
+            </div>
+            <div id="form-adulto" class="formulario" style="display:none;">
+                <h3>Registro de Adulto</h3>
+                <form>
+                    <label>Iglesia:</label>
+                    <select name="iglesia" required>
+                        <option value="">Seleccione</option>
+                        <option value="central">Iglesia Central</option>
+                        <option value="tekera">Filial La Tekera</option>
+                        <option value="pital">Filial El Pital</option>
+                        <option value="sauce">Filial El Sauce</option>
+                    </select><br>
+                    <label>Nombre:</label><input type="text" name="nombre_adulto" required><br>
+                    <label>Sexo:</label>
+                    <select name="sexo_adulto" required>
+                        <option value="">Seleccione</option>
+                        <option value="hombre">Hombre</option>
+                        <option value="mujer">Mujer</option>
+                    </select><br>
+                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_adulto" required onchange="calcularEdad(this, 'edad_adulto')"><br>
+                    <label>Edad:</label><input type="number" name="edad_adulto" id="edad_adulto" min="26" readonly required><br>
+                    <label>DUI (opcional):</label><input type="text" name="dui_adulto" placeholder="00000000-0"><br>
+                    <label>Estado Civil:</label>
+                    <select name="estado_civil_adulto" id="estado_civil_adulto" onchange="mostrarConyugueOAcompanado()">
+                        <option value="soltero">Soltero</option>
+                        <option value="casado">Casado</option>
+                        <option value="acompañado">Acompañado</option>
+                        <option value="viudo">Viudo</option>
+                    </select><br>
+                    <div id="campo_conyugue" style="display:none;">
+                        <label>Nombre del Cónyuge:</label><input type="text" name="nombre_conyugue"><br>
+                    </div>
+                    <div id="campo_acompanado" style="display:none;">
+                        <label>Nombre del Acompañado(a):</label><input type="text" name="nombre_acompanado"><br>
+                    </div>
+                    <label>¿Tiene hijos?</label>
+                    <select name="tiene_hijos" id="tiene_hijos" onchange="mostrarHijos()">
+                        <option value="no">No</option>
+                        <option value="si">Sí</option>
+                    </select><br>
+                    <div id="datos_hijos" style="display:none;">
+                        <label>Cantidad de hijos:</label>
+                        <input type="number" name="cantidad_hijos" id="cantidad_hijos" min="1" max="20" onchange="generarCamposHijos()"><br>
+                        <div id="nombres_hijos"></div>
+                    </div>
+                    <label>Fotografía:</label>
+                    <input type="file" accept="image/*" capture="environment" name="foto" id="foto_adulto"><br>
+                    <button type="submit">Registrar Adulto</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script>
+        function showForm(tipo) {
+            document.getElementById('form-nino').style.display = 'none';
+            document.getElementById('form-joven').style.display = 'none';
+            document.getElementById('form-adulto').style.display = 'none';
+            document.getElementById('form-' + tipo).style.display = 'block';
+        }
+        function calcularEdad(input, idEdad) {
+            const fechaNac = new Date(input.value);
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - fechaNac.getFullYear();
+            const m = hoy.getMonth() - fechaNac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+                edad--;
+            }
+            document.getElementById(idEdad).value = edad > 0 ? edad : 0;
+        }
+        function mostrarConyugueOAcompanado() {
+            var estado = document.getElementById('estado_civil_adulto').value;
+            var campoConyugue = document.getElementById('campo_conyugue');
+            var campoAcompanado = document.getElementById('campo_acompanado');
+            if (estado === 'casado') {
+                campoConyugue.style.display = 'block';
+                campoAcompanado.style.display = 'none';
+            } else if (estado === 'acompañado') {
+                campoConyugue.style.display = 'none';
+                campoAcompanado.style.display = 'block';
+            } else {
+                campoConyugue.style.display = 'none';
+                campoAcompanado.style.display = 'none';
+            }
+        }
+        function mostrarHijos() {
+            var tieneHijos = document.getElementById('tiene_hijos').value;
+            var datosHijos = document.getElementById('datos_hijos');
+            var nombresHijos = document.getElementById('nombres_hijos');
+            if (tieneHijos === 'si') {
+                datosHijos.style.display = 'block';
+            } else {
+                datosHijos.style.display = 'none';
+                nombresHijos.innerHTML = '';
+            }
+        }
+        function generarCamposHijos() {
+            var cantidad = parseInt(document.getElementById('cantidad_hijos').value) || 0;
+            var nombresHijos = document.getElementById('nombres_hijos');
+            nombresHijos.innerHTML = '';
+            for (var i = 1; i <= cantidad; i++) {
+                nombresHijos.innerHTML += '<label>Nombre del hijo ' + i + ':</label><input type="text" name="nombre_hijo_' + i + '"><br>';
+            }
+        }
+        // Guardar y mostrar miembros usando localStorage
+        function obtenerMiembros() {
+            return JSON.parse(localStorage.getItem('miembros') || '[]');
+        }
+        function agregarMiembro(miembro) {
+            const miembros = obtenerMiembros();
+            miembros.push(miembro);
+            localStorage.setItem('miembros', JSON.stringify(miembros));
+        }
+        function mostrarMensaje(texto) {
+            alert(texto);
+        }
+        // Manejar el registro y edición de los tres formularios
+        const formularios = document.querySelectorAll('.formulario form');
+        formularios.forEach(form => {
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                const datos = {};
+                const params = new URLSearchParams(window.location.search);
+                const editar = params.get('editar');
+                const idx = localStorage.getItem('editar_miembro_idx');
+                // Procesar foto (si hay)
+                const fotoInput = form.querySelector('input[type="file"][name="foto"]');
+                if (fotoInput && fotoInput.files && fotoInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        datos.foto_base64 = ev.target.result;
+                        guardarRegistro(form, datos, editar, idx);
+                    };
+                    reader.readAsDataURL(fotoInput.files[0]);
+                } else {
+                    guardarRegistro(form, datos, editar, idx);
+                }
+            };
+        });
+        function guardarRegistro(form, datos, editar, idx) {
+            Array.from(form.elements).forEach(el => {
+                if (el.name && el.type !== 'submit' && el.type !== 'file') datos[el.name] = el.value;
+            });
+            // Determinar tipo de miembro
+            if (form.parentElement.id === 'form-nino') datos.tipo = 'nino';
+            if (form.parentElement.id === 'form-joven') datos.tipo = 'joven';
+            if (form.parentElement.id === 'form-adulto') datos.tipo = 'adulto';
+            if (editar && idx !== null) {
+                // Editar miembro existente
+                const miembros = obtenerMiembros();
+                miembros[parseInt(idx)] = { ...miembros[parseInt(idx)], ...datos };
+                localStorage.setItem('miembros', JSON.stringify(miembros));
+                mostrarMensaje('¡Cambios guardados exitosamente!');
+                localStorage.removeItem('editar_miembro_idx');
+                window.location.href = 'miembros.html';
+            } else {
+                agregarMiembro(datos);
+                mostrarMensaje('¡Registro exitoso!');
+                form.reset();
+            }
+        }
+        // Cargar datos para edición si corresponde
+        window.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const editar = params.get('editar');
+            const idx = localStorage.getItem('editar_miembro_idx');
+            if (editar && idx !== null) {
+                const miembros = obtenerMiembros();
+                const miembro = miembros[parseInt(idx)];
+                if (miembro) {
+                    let tipo = miembro.tipo || (miembro.nombre_nino ? 'nino' : miembro.nombre_joven ? 'joven' : 'adulto');
+                    showForm(tipo);
+                    let form = document.querySelector(`#form-${tipo} form`);
+                    for (let key in miembro) {
+                        let input = form.querySelector(`[name='${key}']`);
+                        if (input) {
+                            if (input.type === 'file') continue;
+                            input.value = miembro[key];
+                        }
+                    }
+                    // Cargar hijos si es adulto
+                    if (tipo === 'adulto' && miembro.tiene_hijos === 'si') {
+                        mostrarHijos();
+                        setTimeout(() => {
+                            document.getElementById('cantidad_hijos').value = miembro.cantidad_hijos;
+                            generarCamposHijos();
+                            for (let i = 1; i <= miembro.cantidad_hijos; i++) {
+                                let hijo = form.querySelector(`[name='nombre_hijo_${i}']`);
+                                if (hijo) hijo.value = miembro['nombre_hijo_' + i];
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        });
+    </script>
+    <footer>
+        <p>&copy; 2025 Iglesia. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>
