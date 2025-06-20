@@ -12,11 +12,10 @@
         <h1>Control de Membresía</h1>
         <nav>
             <ul class="menu">
-                <li><a href="inicio.html">Inicio</a></li>
+                <li><a href="index.html">Inicio</a></li>
                 <li><a href="registrar.html">Registrar Miembro</a></li>
                 <li><a href="miembros.html">Miembros</a></li>
                 <li><a href="reportes.html">Reportes</a></li>
-                <li><a href="salir.html">Salir</a></li>
             </ul>
         </nav>
     </header>
@@ -24,8 +23,50 @@
         <section>
             <h2>Bienvenido al sistema de control de membresía</h2>
             <p>Utiliza el menú para navegar entre las opciones.</p>
+            <div style="margin: 30px 0;">
+                <button onclick="exportarMiembros()" style="padding:10px 18px;background:#1abc9c;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;">Exportar miembros</button>
+                <input type="file" id="importarArchivo" accept="application/json" style="display:none;">
+                <button onclick="document.getElementById('importarArchivo').click()" style="padding:10px 18px;background:#34495e;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;margin-left:10px;">Importar miembros</button>
+            </div>
         </section>
     </main>
+    <script>
+    function exportarMiembros() {
+        const miembros = localStorage.getItem('miembros') || '[]';
+        const blob = new Blob([miembros], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'miembros_backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    document.getElementById('importarArchivo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.name.endsWith('.json')) {
+            alert('El archivo debe ser formato .json');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const datos = JSON.parse(ev.target.result);
+                if (Array.isArray(datos) && datos.every(m => typeof m === 'object' && m !== null && m.hasOwnProperty('nombre_nino') || m.hasOwnProperty('nombre_joven') || m.hasOwnProperty('nombre_adulto'))) {
+                    localStorage.setItem('miembros', JSON.stringify(datos));
+                    alert('¡Miembros importados correctamente!');
+                } else {
+                    alert('El archivo no tiene el formato correcto de miembros.');
+                }
+            } catch {
+                alert('El archivo no es válido.');
+            }
+        };
+        reader.readAsText(file);
+    });
+    </script>
     <footer>
         <p>&copy; 2025 Iglesia. Todos los derechos reservados.</p>
     </footer>
