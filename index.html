@@ -54,9 +54,18 @@
         reader.onload = function(ev) {
             try {
                 const datos = JSON.parse(ev.target.result);
-                if (Array.isArray(datos) && datos.every(m => typeof m === 'object' && m !== null && m.hasOwnProperty('nombre_nino') || m.hasOwnProperty('nombre_joven') || m.hasOwnProperty('nombre_adulto'))) {
-                    localStorage.setItem('miembros', JSON.stringify(datos));
-                    alert('¡Miembros importados correctamente!');
+                if (Array.isArray(datos) && datos.every(m => typeof m === 'object' && m !== null && (m.hasOwnProperty('nombre_nino') || m.hasOwnProperty('nombre_joven') || m.hasOwnProperty('nombre_adulto')))) {
+                    // Obtener los miembros actuales
+                    const actuales = JSON.parse(localStorage.getItem('miembros') || '[]');
+                    // Unir y evitar duplicados exactos
+                    const todos = [...actuales];
+                    datos.forEach(nuevo => {
+                        if (!todos.some(m => JSON.stringify(m) === JSON.stringify(nuevo))) {
+                            todos.push(nuevo);
+                        }
+                    });
+                    localStorage.setItem('miembros', JSON.stringify(todos));
+                    alert('¡Miembros importados y combinados correctamente! Se han agregado ' + (todos.length - actuales.length) + ' nuevos miembros.');
                 } else {
                     alert('El archivo no tiene el formato correcto de miembros.');
                 }
