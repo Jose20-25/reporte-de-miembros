@@ -117,6 +117,8 @@
                     <label>Estado Civil:</label>
                     <select name="estado_civil_adulto" id="estado_civil_adulto" onchange="mostrarConyugueOAcompanado()">
                         <option value="soltero">Soltero</option>
+                        <option value="madre_soltera">Madre Soltera</option>
+                        <option value="padre_soltero">Padre Soltero</option>
                         <option value="casado">Casado</option>
                         <option value="acompañado">Acompañado</option>
                         <option value="viudo">Viudo</option>
@@ -255,6 +257,12 @@
                 agregarMiembro(datos);
                 mostrarMensaje('¡Registro exitoso!');
                 form.reset();
+                // Limpiar la vista previa de la foto
+                const preview = form.querySelector('.preview-foto');
+                if (preview) {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
             }
         }
         // Cargar datos para edición si corresponde

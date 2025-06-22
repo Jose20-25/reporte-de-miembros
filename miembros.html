@@ -23,6 +23,9 @@
     align-items: center;
     transition: box-shadow 0.2s;
     position: relative;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
 }
 .card-miembro:hover {
     box-shadow: 0 4px 16px rgba(26,188,156,0.15);
@@ -55,6 +58,13 @@
     margin-bottom: 6px;
     text-align: center;
 }
+.card-miembro.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+html {
+    scroll-behavior: smooth;
+}
 @media (max-width: 800px) {
     .card-list { flex-direction: column; align-items: center; }
     .card-miembro { width: 95%; }
@@ -86,6 +96,8 @@
             <div class="card-list" id="pital"></div>
             <h3>Filial El Sauce</h3>
             <div class="card-list" id="sauce"></div>
+            <button id="descargarPDF" style="margin:20px 0;padding:10px 20px;background:#1abc9c;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;">Descargar registro en PDF</button>
+            <div class="card-list" id="lista-miembros"></div>
         </section>
     </main>
     <footer>
@@ -112,7 +124,7 @@ function renderizarMiembros() {
             let estado = miembro.estado_civil_adulto || '';
             let iglesia = key === 'central' ? 'Iglesia Central' : key === 'tekera' ? 'Filial La Tekera' : key === 'pital' ? 'Filial El Pital' : 'Filial El Sauce';
             let foto = miembro.foto_base64 || '';
-            let imgTag = foto ? `<img src="${foto}" alt="Foto" ondblclick="editarMiembro(${miembro._idx})">` : '<img src="logo/logo Iglesia.png" alt="Foto" ondblclick="editarMiembro(' + miembro._idx + ')">';
+            let imgTag = foto ? `<img src="${foto}" alt="Foto" onclick="mostrarImagenGrande('${foto.replace(/'/g, '\'')}', '${nombre}')">` : '<img src="logo/logo Iglesia.png" alt="Foto" onclick="mostrarImagenGrande(\'logo/logo Iglesia.png\', \'Sin nombre\')">';
             let fechaNac = miembro.fecha_nacimiento_nino || miembro.fecha_nacimiento_joven || miembro.fecha_nacimiento_adulto || '';
             let dui = miembro.dui_joven || miembro.dui_adulto || '';
             let telefono = miembro.telefono_joven || '';
@@ -144,6 +156,10 @@ function renderizarMiembros() {
                     ${conyugue ? `<div class="detalle">Cónyuge: ${conyugue}</div>` : ''}
                     ${acompanado ? `<div class="detalle">Acompañado(a): ${acompanado}</div>` : ''}
                     ${tieneHijos === 'si' ? `<div class="detalle">Hijos:<ul style='margin:0 0 0 15px;padding:0;'>${hijos}</ul></div>` : ''}
+                    <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;">
+                        <button onclick="editarMiembro(${miembro._idx})" style="background:#2980b9;color:#fff;padding:5px 12px;border:none;border-radius:4px;cursor:pointer;">Editar</button>
+                        <button onclick="eliminarMiembro(${miembro._idx})" style="background:#e74c3c;color:#fff;padding:5px 12px;border:none;border-radius:4px;cursor:pointer;">Eliminar</button>
+                    </div>
                 </div>
             `;
         });
@@ -160,7 +176,137 @@ function editarMiembro(idx) {
     window.location.href = 'registrar.html?editar=1';
 }
 
-document.addEventListener('DOMContentLoaded', renderizarMiembros);
+function mostrarMiembros() {
+    const miembros = JSON.parse(localStorage.getItem('miembros') || '[]');
+    const contenedor = document.getElementById('lista-miembros');
+    contenedor.innerHTML = '';
+    miembros.forEach((m, idx) => {
+        let nombre = m.nombre_nino || m.nombre_joven || m.nombre_adulto || '';
+        let iglesia = '';
+        if (m.iglesia === 'central') iglesia = 'Iglesia Central';
+        if (m.iglesia === 'tekera') iglesia = 'Filial La Tekera';
+        if (m.iglesia === 'pital') iglesia = 'Filial El Pital';
+        if (m.iglesia === 'sauce') iglesia = 'Filial El Sauce';
+        let foto = m.foto_base64 || '';
+        contenedor.innerHTML += `
+            <div class="card-miembro">
+                ${foto ? `<img src="${foto}" alt="Foto">` : '<img src="logo/logo Iglesia.png" alt="Foto">'}
+                <div class="nombre">${nombre}</div>
+                <div class="iglesia">${iglesia}</div>
+                <button onclick="eliminarMiembro(${idx})" style="background:#e74c3c;color:#fff;padding:5px 12px;border:none;border-radius:4px;cursor:pointer;margin-top:8px;">Eliminar</button>
+            </div>
+        `;
+    });
+}
+function eliminarMiembro(idx) {
+    if (confirm('¿Seguro que deseas eliminar este miembro?')) {
+        let miembros = JSON.parse(localStorage.getItem('miembros') || '[]');
+        miembros.splice(idx, 1);
+        localStorage.setItem('miembros', JSON.stringify(miembros));
+        mostrarMiembros();
+    }
+}
+
+function animarCards() {
+    const cards = document.querySelectorAll('.card-miembro');
+    const trigger = window.innerHeight * 0.95;
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < trigger) {
+            card.classList.add('visible');
+        } else {
+            card.classList.remove('visible');
+        }
+    });
+}
+window.addEventListener('scroll', animarCards);
+window.addEventListener('resize', animarCards);
+document.addEventListener('DOMContentLoaded', function() {
+    renderizarMiembros();
+    mostrarMiembros();
+    setTimeout(animarCards, 100); // Para animar al cargar
+});
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+document.getElementById('descargarPDF').addEventListener('click', function() {
+    const area = document.createElement('div');
+    const miembros = JSON.parse(localStorage.getItem('miembros') || '[]');
+    const iglesias = {
+        central: 'Iglesia Central',
+        tekera: 'Filial La Tekera',
+        pital: 'Filial El Pital',
+        sauce: 'Filial El Sauce'
+    };
+    let html = '';
+    Object.keys(iglesias).forEach(key => {
+        const miembrosIglesia = miembros.filter(m => m.iglesia === key);
+        if (miembrosIglesia.length > 0) {
+            html += `<h2 style='color:#1abc9c;border-bottom:2px solid #1abc9c;padding-bottom:4px;margin-top:30px;'>${iglesias[key]}</h2>`;
+            miembrosIglesia.forEach(m => {
+                let nombre = m.nombre_nino || m.nombre_joven || m.nombre_adulto || '';
+                let fechaNac = m.fecha_nacimiento_nino || m.fecha_nacimiento_joven || m.fecha_nacimiento_adulto || '';
+                let sexo = m.sexo_nino || m.sexo_joven || m.sexo_adulto || '';
+                let edad = m.edad_nino || m.edad_joven || m.edad_adulto || '';
+                let foto = m.foto_base64 || '';
+                let dui = m.dui_joven || m.dui_adulto || '';
+                let telefono = m.telefono_joven || '';
+                let padre = m.padre_nino || m.padre_joven || '';
+                let madre = m.madre_nino || m.madre_joven || '';
+                let estado = m.estado_civil_adulto || '';
+                let conyugue = m.nombre_conyugue || '';
+                let acompanado = m.nombre_acompanado || '';
+                let tieneHijos = m.tiene_hijos || '';
+                let cantidadHijos = m.cantidad_hijos || '';
+                let hijos = '';
+                if (cantidadHijos && parseInt(cantidadHijos) > 0) {
+                    for (let i = 1; i <= cantidadHijos; i++) {
+                        hijos += `<li>${m['nombre_hijo_' + i]}</li>`;
+                    }
+                }
+                html += `<div style='border:1px solid #ccc;padding:12px 18px;margin-bottom:18px;border-radius:8px;display:flex;gap:18px;align-items:center;'>`
+                    + (foto ? `<img src='${foto}' style='width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #1abc9c;'>` : '')
+                    + `<div><b>${nombre}</b><br>Sexo: ${sexo}<br>Fecha Nac.: ${fechaNac}<br>Edad: ${edad}<br>${dui ? 'DUI: ' + dui + '<br>' : ''}${telefono ? 'Teléfono: ' + telefono + '<br>' : ''}${padre ? 'Padre: ' + padre + '<br>' : ''}${madre ? 'Madre: ' + madre + '<br>' : ''}${estado ? 'Estado Civil: ' + estado + '<br>' : ''}${conyugue ? 'Cónyuge: ' + conyugue + '<br>' : ''}${acompanado ? 'Acompañado(a): ' + acompanado + '<br>' : ''}${tieneHijos === 'si' ? 'Hijos:<ul>' + hijos + '</ul>' : ''}</div></div>`;
+            });
+        }
+    });
+    area.innerHTML = html;
+    document.body.appendChild(area);
+    html2canvas(area, {scale:2}).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgProps = pdf.getImageProperties(imgData);
+        let pdfWidth = pageWidth - 20;
+        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        let position = 10;
+        if (pdfHeight > pageHeight - 20) {
+            pdfHeight = pageHeight - 20;
+        }
+        pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, pdfHeight);
+        pdf.save('registro_miembros.pdf');
+        document.body.removeChild(area);
+    });
+});
+</script>
+<script>
+function mostrarImagenGrande(src, nombre) {
+    let modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = 0;
+    modal.style.left = 0;
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.8)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = 9999;
+    modal.innerHTML = `<div style='background:#fff;padding:18px 18px 10px 18px;border-radius:10px;box-shadow:0 2px 16px #0008;text-align:center;max-width:95vw;max-height:90vh;'><img src='${src}' alt='${nombre}' style='max-width:80vw;max-height:70vh;border-radius:10px;box-shadow:0 2px 8px #0004;'><div style='margin-top:10px;'><button onclick='document.body.removeChild(this.parentNode.parentNode.parentNode)' style='padding:7px 18px;background:#1abc9c;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;'>Cerrar</button></div></div>`;
+    document.body.appendChild(modal);
+}
+</script>
 </body>
 </html>
