@@ -31,22 +31,22 @@
                 <h3>Registro de Niño</h3>
                 <form>
                     <label>Iglesia:</label>
-                    <select name="iglesia" required>
+                    <select name="iglesia">
                         <option value="">Seleccione</option>
                         <option value="central">Iglesia Central</option>
                         <option value="tekera">Filial La Tekera</option>
                         <option value="pital">Filial El Pital</option>
                         <option value="sauce">Filial El Sauce</option>
                     </select><br>
-                    <label>Nombre:</label><input type="text" name="nombre_nino" required><br>
+                    <label>Nombre:</label><input type="text" name="nombre_nino"><br>
                     <label>Sexo:</label>
-                    <select name="sexo_nino" required>
+                    <select name="sexo_nino">
                         <option value="">Seleccione</option>
                         <option value="hombre">Hombre</option>
                         <option value="mujer">Mujer</option>
                     </select><br>
-                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_nino" required onchange="calcularEdad(this, 'edad_nino')"><br>
-                    <label>Edad:</label><input type="number" name="edad_nino" id="edad_nino" min="0" max="12" readonly required><br>
+                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_nino" onchange="calcularEdad(this, 'edad_nino')"><br>
+                    <label>Edad:</label><input type="number" name="edad_nino" id="edad_nino" min="0" max="12" readonly><br>
                     <label>Nombre del Padre:</label><input type="text" name="padre_nino"><br>
                     <label>Nombre de la Madre:</label><input type="text" name="madre_nino"><br>
                     <label>Fotografía:</label>
@@ -63,22 +63,22 @@
                 <h3>Registro de Joven</h3>
                 <form>
                     <label>Iglesia:</label>
-                    <select name="iglesia" required>
+                    <select name="iglesia">
                         <option value="">Seleccione</option>
                         <option value="central">Iglesia Central</option>
                         <option value="tekera">Filial La Tekera</option>
                         <option value="pital">Filial El Pital</option>
                         <option value="sauce">Filial El Sauce</option>
                     </select><br>
-                    <label>Nombre:</label><input type="text" name="nombre_joven" required><br>
+                    <label>Nombre:</label><input type="text" name="nombre_joven"><br>
                     <label>Sexo:</label>
-                    <select name="sexo_joven" required>
+                    <select name="sexo_joven">
                         <option value="">Seleccione</option>
                         <option value="hombre">Hombre</option>
                         <option value="mujer">Mujer</option>
                     </select><br>
-                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_joven" required onchange="calcularEdad(this, 'edad_joven')"><br>
-                    <label>Edad:</label><input type="number" name="edad_joven" id="edad_joven" min="13" max="25" readonly required><br>
+                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_joven" onchange="calcularEdad(this, 'edad_joven')"><br>
+                    <label>Edad:</label><input type="number" name="edad_joven" id="edad_joven" min="13" max="25" readonly><br>
                     <label>DUI (opcional):</label><input type="text" name="dui_joven" placeholder="00000000-0"><br>
                     <label>Teléfono:</label><input type="text" name="telefono_joven"><br>
                     <label>Nombre del Padre:</label><input type="text" name="padre_joven"><br>
@@ -97,22 +97,22 @@
                 <h3>Registro de Adulto</h3>
                 <form>
                     <label>Iglesia:</label>
-                    <select name="iglesia" required>
+                    <select name="iglesia">
                         <option value="">Seleccione</option>
                         <option value="central">Iglesia Central</option>
                         <option value="tekera">Filial La Tekera</option>
                         <option value="pital">Filial El Pital</option>
                         <option value="sauce">Filial El Sauce</option>
                     </select><br>
-                    <label>Nombre:</label><input type="text" name="nombre_adulto" required><br>
+                    <label>Nombre:</label><input type="text" name="nombre_adulto"><br>
                     <label>Sexo:</label>
-                    <select name="sexo_adulto" required>
+                    <select name="sexo_adulto">
                         <option value="">Seleccione</option>
                         <option value="hombre">Hombre</option>
                         <option value="mujer">Mujer</option>
                     </select><br>
-                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_adulto" required onchange="calcularEdad(this, 'edad_adulto')"><br>
-                    <label>Edad:</label><input type="number" name="edad_adulto" id="edad_adulto" min="26" readonly required><br>
+                    <label>Fecha de Nacimiento:</label><input type="date" name="fecha_nacimiento_adulto" onchange="calcularEdad(this, 'edad_adulto')"><br>
+                    <label>Edad:</label><input type="number" name="edad_adulto" id="edad_adulto" min="26" readonly><br>
                     <label>DUI (opcional):</label><input type="text" name="dui_adulto" placeholder="00000000-0"><br>
                     <label>Estado Civil:</label>
                     <select name="estado_civil_adulto" id="estado_civil_adulto" onchange="mostrarConyugueOAcompanado()">
@@ -212,7 +212,23 @@
             localStorage.setItem('miembros', JSON.stringify(miembros));
         }
         function mostrarMensaje(texto) {
-            alert(texto);
+            // alert(texto);
+            // Mostrar mensaje flotante en vez de alert
+            let msg = document.createElement('div');
+            msg.textContent = texto;
+            msg.style.position = 'fixed';
+            msg.style.top = '30px';
+            msg.style.left = '50%';
+            msg.style.transform = 'translateX(-50%)';
+            msg.style.background = '#1abc9c';
+            msg.style.color = '#fff';
+            msg.style.padding = '14px 32px';
+            msg.style.borderRadius = '8px';
+            msg.style.fontSize = '1.1em';
+            msg.style.boxShadow = '0 2px 12px #0003';
+            msg.style.zIndex = 9999;
+            document.body.appendChild(msg);
+            setTimeout(() => { document.body.removeChild(msg); }, 1800);
         }
         // Manejar el registro y edición de los tres formularios
         const formularios = document.querySelectorAll('.formulario form');

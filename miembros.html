@@ -97,7 +97,6 @@ html {
             <h3>Filial El Sauce</h3>
             <div class="card-list" id="sauce"></div>
             <button id="descargarPDF" style="margin:20px 0;padding:10px 20px;background:#1abc9c;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;">Descargar registro en PDF</button>
-            <div class="card-list" id="lista-miembros"></div>
         </section>
     </main>
     <footer>
@@ -176,34 +175,12 @@ function editarMiembro(idx) {
     window.location.href = 'registrar.html?editar=1';
 }
 
-function mostrarMiembros() {
-    const miembros = JSON.parse(localStorage.getItem('miembros') || '[]');
-    const contenedor = document.getElementById('lista-miembros');
-    contenedor.innerHTML = '';
-    miembros.forEach((m, idx) => {
-        let nombre = m.nombre_nino || m.nombre_joven || m.nombre_adulto || '';
-        let iglesia = '';
-        if (m.iglesia === 'central') iglesia = 'Iglesia Central';
-        if (m.iglesia === 'tekera') iglesia = 'Filial La Tekera';
-        if (m.iglesia === 'pital') iglesia = 'Filial El Pital';
-        if (m.iglesia === 'sauce') iglesia = 'Filial El Sauce';
-        let foto = m.foto_base64 || '';
-        contenedor.innerHTML += `
-            <div class="card-miembro">
-                ${foto ? `<img src="${foto}" alt="Foto">` : '<img src="logo/logo Iglesia.png" alt="Foto">'}
-                <div class="nombre">${nombre}</div>
-                <div class="iglesia">${iglesia}</div>
-                <button onclick="eliminarMiembro(${idx})" style="background:#e74c3c;color:#fff;padding:5px 12px;border:none;border-radius:4px;cursor:pointer;margin-top:8px;">Eliminar</button>
-            </div>
-        `;
-    });
-}
 function eliminarMiembro(idx) {
     if (confirm('¿Seguro que deseas eliminar este miembro?')) {
         let miembros = JSON.parse(localStorage.getItem('miembros') || '[]');
         miembros.splice(idx, 1);
         localStorage.setItem('miembros', JSON.stringify(miembros));
-        mostrarMiembros();
+        renderizarMiembros();
     }
 }
 
@@ -223,7 +200,6 @@ window.addEventListener('scroll', animarCards);
 window.addEventListener('resize', animarCards);
 document.addEventListener('DOMContentLoaded', function() {
     renderizarMiembros();
-    mostrarMiembros();
     setTimeout(animarCards, 100); // Para animar al cargar
 });
     </script>
