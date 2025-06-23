@@ -287,6 +287,40 @@
                 }
             }
         });
+        // Cambiar el botón de submit por button y manejar el guardado manualmente
+        // (Esto es para máxima compatibilidad móvil, especialmente en iOS/Safari)
+        document.querySelectorAll('.formulario form').forEach(form => {
+            // Cambia el botón de submit a type="button" y agrega id único
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.type = 'button';
+                btn.classList.add('btn-guardar');
+            }
+        });
+        // Ahora asignar el evento click a los botones de guardar
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.formulario form .btn-guardar').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const form = btn.closest('form');
+                    const datos = {};
+                    const params = new URLSearchParams(window.location.search);
+                    const editar = params.get('editar');
+                    const idx = localStorage.getItem('editar_miembro_idx');
+                    // Procesar foto (si hay)
+                    const fotoInput = form.querySelector('input[type="file"][name="foto"]');
+                    if (fotoInput && fotoInput.files && fotoInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            datos.foto_base64 = ev.target.result;
+                            try { guardarRegistro(form, datos, editar, idx); } catch(err) { mostrarMensaje('Error: ' + err.message); }
+                        };
+                        reader.readAsDataURL(fotoInput.files[0]);
+                    } else {
+                        try { guardarRegistro(form, datos, editar, idx); } catch(err) { mostrarMensaje('Error: ' + err.message); }
+                    }
+                });
+            });
+        });
         function abrirCamara(btn) {
             const input = btn.parentElement.querySelector('input[type="file"]');
             input.accept = 'image/*';
