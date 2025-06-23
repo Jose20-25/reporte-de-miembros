@@ -202,62 +202,108 @@
                 nombresHijos.innerHTML += '<label>Nombre del hijo ' + i + ':</label><input type="text" name="nombre_hijo_' + i + '"><br>';
             }
         }
-        // Guardar y mostrar miembros usando localStorage
-        function obtenerMiembros() {
-            return JSON.parse(localStorage.getItem('miembros') || '[]');
-        }
-        function agregarMiembro(miembro) {
-            const miembros = obtenerMiembros();
-            miembros.push(miembro);
-            localStorage.setItem('miembros', JSON.stringify(miembros));
-        }
-        function mostrarMensaje(texto) {
-            // alert(texto);
-            // Mostrar mensaje flotante en vez de alert
-            let msg = document.createElement('div');
-            msg.textContent = texto;
-            msg.style.position = 'fixed';
-            msg.style.top = '30px';
-            msg.style.left = '50%';
-            msg.style.transform = 'translateX(-50%)';
-            msg.style.background = '#1abc9c';
-            msg.style.color = '#fff';
-            msg.style.padding = '14px 32px';
-            msg.style.borderRadius = '8px';
-            msg.style.fontSize = '1.1em';
-            msg.style.boxShadow = '0 2px 12px #0003';
-            msg.style.zIndex = 9999;
-            document.body.appendChild(msg);
-            setTimeout(() => { document.body.removeChild(msg); }, 1800);
-        }
-        function guardarRegistro(form, datos, editar, idx) {
-            Array.from(form.elements).forEach(el => {
-                if (el.name && el.type !== 'submit' && el.type !== 'file') datos[el.name] = el.value;
-            });
-            // Determinar tipo de miembro
-            if (form.parentElement.id === 'form-nino') datos.tipo = 'nino';
-            if (form.parentElement.id === 'form-joven') datos.tipo = 'joven';
-            if (form.parentElement.id === 'form-adulto') datos.tipo = 'adulto';
-            if (editar && idx !== null) {
-                // Editar miembro existente
-                const miembros = obtenerMiembros();
-                miembros[parseInt(idx)] = { ...miembros[parseInt(idx)], ...datos };
-                localStorage.setItem('miembros', JSON.stringify(miembros));
-                mostrarMensaje('¡Cambios guardados exitosamente!');
-                localStorage.removeItem('editar_miembro_idx');
-                window.location.href = 'miembros.html';
-            } else {
-                agregarMiembro(datos);
-                mostrarMensaje('¡Registro exitoso!');
-                form.reset();
-                // Limpiar la vista previa de la foto
-                const preview = form.querySelector('.preview-foto');
-                if (preview) {
-                    preview.src = '';
-                    preview.style.display = 'none';
-                }
+        // === IndexedDB para miembros ===
+const DB_NAME = 'membresiaDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'miembros';
+
+function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = function(e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
             }
+        };
+        request.onsuccess = function(e) { resolve(e.target.result); };
+        request.onerror = function(e) { reject(e.target.error); };
+    });
+}
+async function agregarMiembroIndexedDB(miembro) {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).add(miembro).onsuccess = resolve;
+        tx.onerror = e => reject(e.target.error);
+    });
+}
+async function obtenerMiembrosIndexedDB() {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = e => reject(e.target.error);
+    });
+}
+async function editarMiembroIndexedDB(id, datos) {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.get(id);
+        req.onsuccess = () => {
+            const miembro = req.result;
+            if (!miembro) return reject('No encontrado');
+            Object.assign(miembro, datos);
+            store.put(miembro).onsuccess = resolve;
+        };
+        req.onerror = e => reject(e.target.error);
+    });
+}
+async function eliminarMiembroIndexedDB(id) {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id).onsuccess = resolve;
+        tx.onerror = e => reject(e.target.error);
+    });
+}
+// Migrar de localStorage a IndexedDB solo la primera vez
+(async function migrarLocalStorage() {
+    if (!localStorage.getItem('migrado_indexeddb')) {
+        const miembros = JSON.parse(localStorage.getItem('miembros') || '[]');
+        for (const m of miembros) {
+            await agregarMiembroIndexedDB(m);
         }
+        localStorage.setItem('migrado_indexeddb', '1');
+        // Opcional: limpiar localStorage
+        // localStorage.removeItem('miembros');
+    }
+})();
+// Reemplazar funciones para usar IndexedDB
+async function obtenerMiembros() {
+    return await obtenerMiembrosIndexedDB();
+}
+async function agregarMiembro(miembro) {
+    await agregarMiembroIndexedDB(miembro);
+}
+        // Adaptar guardarRegistro para usar await
+async function guardarRegistro(form, datos, editar, idx) {
+    Array.from(form.elements).forEach(el => {
+        if (el.name && el.type !== 'submit' && el.type !== 'file') datos[el.name] = el.value;
+    });
+    if (form.parentElement.id === 'form-nino') datos.tipo = 'nino';
+    if (form.parentElement.id === 'form-joven') datos.tipo = 'joven';
+    if (form.parentElement.id === 'form-adulto') datos.tipo = 'adulto';
+    if (editar && idx !== null) {
+        await editarMiembroIndexedDB(Number(idx), datos);
+        mostrarMensaje('¡Cambios guardados exitosamente!');
+        localStorage.removeItem('editar_miembro_idx');
+        window.location.href = 'miembros.html';
+    } else {
+        await agregarMiembroIndexedDB(datos);
+        mostrarMensaje('¡Registro exitoso!');
+        form.reset();
+        const preview = form.querySelector('.preview-foto');
+        if (preview) {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    }
+}
         // Manejar el registro y edición de los tres formularios
         window.addEventListener('DOMContentLoaded', function() {
             const formularios = document.querySelectorAll('.formulario form');
