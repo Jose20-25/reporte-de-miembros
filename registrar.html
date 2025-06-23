@@ -231,58 +231,30 @@
             setTimeout(() => { document.body.removeChild(msg); }, 1800);
         }
         // Manejar el registro y edición de los tres formularios
-        const formularios = document.querySelectorAll('.formulario form');
-        formularios.forEach(form => {
-            form.onsubmit = function(e) {
-                e.preventDefault();
-                const datos = {};
-                const params = new URLSearchParams(window.location.search);
-                const editar = params.get('editar');
-                const idx = localStorage.getItem('editar_miembro_idx');
-                // Procesar foto (si hay)
-                const fotoInput = form.querySelector('input[type="file"][name="foto"]');
-                if (fotoInput && fotoInput.files && fotoInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        datos.foto_base64 = ev.target.result;
-                        guardarRegistro(form, datos, editar, idx);
-                    };
-                    reader.readAsDataURL(fotoInput.files[0]);
-                } else {
-                    guardarRegistro(form, datos, editar, idx);
-                }
-            };
-        });
-        function guardarRegistro(form, datos, editar, idx) {
-            Array.from(form.elements).forEach(el => {
-                if (el.name && el.type !== 'submit' && el.type !== 'file') datos[el.name] = el.value;
-            });
-            // Determinar tipo de miembro
-            if (form.parentElement.id === 'form-nino') datos.tipo = 'nino';
-            if (form.parentElement.id === 'form-joven') datos.tipo = 'joven';
-            if (form.parentElement.id === 'form-adulto') datos.tipo = 'adulto';
-            if (editar && idx !== null) {
-                // Editar miembro existente
-                const miembros = obtenerMiembros();
-                miembros[parseInt(idx)] = { ...miembros[parseInt(idx)], ...datos };
-                localStorage.setItem('miembros', JSON.stringify(miembros));
-                mostrarMensaje('¡Cambios guardados exitosamente!');
-                localStorage.removeItem('editar_miembro_idx');
-                window.location.href = 'miembros.html';
-            } else {
-                agregarMiembro(datos);
-                mostrarMensaje('¡Registro exitoso!');
-                form.reset();
-                // Limpiar la vista previa de la foto
-                const preview = form.querySelector('.preview-foto');
-                if (preview) {
-                    preview.src = '';
-                    preview.style.display = 'none';
-                }
-            }
-        }
-        // Cargar datos para edición si corresponde
         window.addEventListener('DOMContentLoaded', function() {
+            const formularios = document.querySelectorAll('.formulario form');
+            formularios.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const datos = {};
+                    const params = new URLSearchParams(window.location.search);
+                    const editar = params.get('editar');
+                    const idx = localStorage.getItem('editar_miembro_idx');
+                    // Procesar foto (si hay)
+                    const fotoInput = form.querySelector('input[type="file"][name="foto"]');
+                    if (fotoInput && fotoInput.files && fotoInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            datos.foto_base64 = ev.target.result;
+                            guardarRegistro(form, datos, editar, idx);
+                        };
+                        reader.readAsDataURL(fotoInput.files[0]);
+                    } else {
+                        guardarRegistro(form, datos, editar, idx);
+                    }
+                });
+            });
+            // Cargar datos para edición si corresponde
             const params = new URLSearchParams(window.location.search);
             const editar = params.get('editar');
             const idx = localStorage.getItem('editar_miembro_idx');
