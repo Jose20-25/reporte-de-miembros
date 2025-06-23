@@ -230,6 +230,34 @@
             document.body.appendChild(msg);
             setTimeout(() => { document.body.removeChild(msg); }, 1800);
         }
+        function guardarRegistro(form, datos, editar, idx) {
+            Array.from(form.elements).forEach(el => {
+                if (el.name && el.type !== 'submit' && el.type !== 'file') datos[el.name] = el.value;
+            });
+            // Determinar tipo de miembro
+            if (form.parentElement.id === 'form-nino') datos.tipo = 'nino';
+            if (form.parentElement.id === 'form-joven') datos.tipo = 'joven';
+            if (form.parentElement.id === 'form-adulto') datos.tipo = 'adulto';
+            if (editar && idx !== null) {
+                // Editar miembro existente
+                const miembros = obtenerMiembros();
+                miembros[parseInt(idx)] = { ...miembros[parseInt(idx)], ...datos };
+                localStorage.setItem('miembros', JSON.stringify(miembros));
+                mostrarMensaje('¡Cambios guardados exitosamente!');
+                localStorage.removeItem('editar_miembro_idx');
+                window.location.href = 'miembros.html';
+            } else {
+                agregarMiembro(datos);
+                mostrarMensaje('¡Registro exitoso!');
+                form.reset();
+                // Limpiar la vista previa de la foto
+                const preview = form.querySelector('.preview-foto');
+                if (preview) {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
+            }
+        }
         // Manejar el registro y edición de los tres formularios
         window.addEventListener('DOMContentLoaded', function() {
             const formularios = document.querySelectorAll('.formulario form');
